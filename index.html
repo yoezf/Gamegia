@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Lumina Rift — Legenda Penjaga Kristal</title>
 <style>
 :root{--gold:#ffd36b;--panel:rgba(20,12,44,.9);--line:rgba(255,255,255,.16);--cyan:#7cf0ff;--pink:#ff6fb5}
@@ -44,6 +44,23 @@ h2{font-size:24px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
 #toast.show{opacity:1}
 .stats{font-size:16px;line-height:1.8;text-align:center}
 #pauseMenu{gap:8px}
+html,body{touch-action:none;-webkit-touch-callout:none}
+#touch{display:none;position:fixed;inset:0;pointer-events:none;z-index:50;--b:min(13vmin,70px);opacity:.82}
+body.touch.playing #touch{display:block}
+.tbtn{pointer-events:auto;width:var(--b);height:var(--b);border-radius:50%;border:2px solid rgba(255,255,255,.6);background:rgba(40,20,90,.5);color:#fff;font:800 calc(var(--b)*.27)/1 "Trebuchet MS",sans-serif;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;padding:0}
+.tbtn.on{background:rgba(255,170,60,.78);border-color:#fff}
+.tbtn.big{width:calc(var(--b)*1.9);height:calc(var(--b)*1.9);background:rgba(255,90,140,.55);font-size:calc(var(--b)*.36)}
+.tbtn.ult{background:rgba(255,120,40,.55)}
+#tPad{position:absolute;left:2vmin;bottom:2vmin;display:flex;gap:1.5vmin;align-items:flex-end}
+#tPad .tbtn{width:calc(var(--b)*1.15);height:calc(var(--b)*1.15)}
+#tAct{position:absolute;right:2vmin;bottom:2vmin;display:grid;grid-template-columns:repeat(4,var(--b));grid-template-rows:repeat(3,var(--b));gap:1.2vmin}
+.tpot{position:absolute;width:calc(var(--b)*.7);height:calc(var(--b)*.7);font-size:calc(var(--b)*.25)}
+#tPause{position:absolute;right:2vmin;top:2vmin;width:calc(var(--b)*.7);height:calc(var(--b)*.7);font-size:calc(var(--b)*.3)}
+.advOnly,.nikOnly{display:none}
+body.adv .advOnly{display:flex}
+body.niken .nikOnly{display:flex}
+#rotHint{display:none;position:fixed;top:0;left:0;right:0;padding:6px;background:rgba(0,0,0,.75);color:#ffd36b;text-align:center;font:700 13px sans-serif;z-index:60}
+@media (orientation:portrait){body.touch.playing #rotHint{display:block}}
 #controlsBox{font-size:12.5px;line-height:1.55;max-width:900px}
 #trainPanel{display:none;position:absolute;right:10px;top:84px;width:262px;padding:8px 10px;background:rgba(14,6,34,.88);border:1px solid var(--line);border-radius:10px;font-size:12px}
 #trainPanel label{display:flex;justify-content:space-between;gap:6px;padding:2px 0;cursor:pointer}
@@ -71,6 +88,7 @@ h2{font-size:24px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
     <b>Step: → , →+↑ , ↓</b> (J = Claw Step) • <b>Shadow Step: (→+↑) ↔ (→+↓)</b> berulang cepat<br>
     <b>Demon Step:</b> Step kanan lalu Step kiri bergantian • <b>Platform Step:</b> Step + <b>↑</b> di akhir (tidak jatuh dari platform)<br>
     Tahan <b>E</b> = Block (J setelah block = Counter) • Tahan <b>J</b> = Charged Slash • <b>S + J</b> = Rising Slash • Latihan: menu Pause<br>
+    <b>HP/tablet:</b> tombol layar muncul otomatis di perangkat sentuh (◀ ▼ ▶, SERANG, LOMPAT, DASH, K/L/U/ULT, MODE untuk Niken, BLOK, ⏸)<br>
     <b>Z (tambahan, semua hero):</b> ketuk = Serang • tahan lalu lepas: tahap 1 = Skill 1, tahap 2 = Skill 2, tahap 3 = Skill 3, tahap 4 = Skill 4/Ultimate (meter muncul di atas kepala)<br>
     <b>Niken:</b> <b>Shift</b> = ganti Performance ⇄ Fighting (kapan saja) • Dash <b>→ →</b>, Air Dash <b>→ →</b> di udara, Backstep <b>↓ lalu belakang</b> • <b>E</b> Block, J setelah Block = Counter
   </div>
@@ -129,6 +147,18 @@ h2{font-size:24px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
 
 <div id="trainPanel"><b>LATIHAN MOVEMENT</b><div class="muted" style="font-size:11px;margin-bottom:4px">Centang = teknik aktif. Matikan yang lain untuk menguji satu teknik. Kamu kebal di mode ini.</div><div id="trainList"></div>
   <div style="margin-top:6px;display:flex;gap:6px"><button class="btn small" id="btnDummy">Spawn Dummy</button><button class="btn small" id="btnTrainReset">Reset</button></div></div>
+<div id="rotHint">Putar HP ke mode landscape agar layar game lebih besar</div>
+<div id="touch">
+  <div id="tPad"><button class="tbtn" data-k="KeyA">◀</button><button class="tbtn" data-k="KeyS">▼</button><button class="tbtn" data-k="KeyD">▶</button></div>
+  <div id="tAct">
+    <button class="tbtn" data-k="KeyK" style="grid-area:1/1">K</button><button class="tbtn" data-k="KeyL" style="grid-area:1/2">L</button><button class="tbtn" data-k="KeyU" style="grid-area:1/3">U</button><button class="tbtn ult" data-k="KeyI" style="grid-area:1/4">ULT</button>
+    <button class="tbtn nikOnly" data-k="ShiftLeft" style="grid-area:2/1">MODE</button><button class="tbtn" data-k="DASH" style="grid-area:2/2">DASH</button>
+    <button class="tbtn advOnly" data-k="KeyE" style="grid-area:3/1">BLOK</button><button class="tbtn" data-k="KeyW" style="grid-area:3/2">LOMPAT</button>
+    <button class="tbtn big" data-k="KeyJ" style="grid-area:2/3/4/5;justify-self:end;align-self:end">SERANG</button>
+  </div>
+  <button class="tbtn" id="tPause" data-k="Escape">⏸</button>
+  <button class="tbtn tpot" style="top:calc(2vmin + var(--b)*.7 + 1vmin);right:calc(2vmin + var(--b)*.0)" data-k="Digit1">HP</button><button class="tbtn tpot" style="top:calc(2vmin + var(--b)*.7 + 1vmin);right:calc(2vmin + var(--b) + 1vmin)" data-k="Digit2">MP</button>
+</div>
 <div id="toast"></div>
 </div></div>
 
@@ -265,6 +295,19 @@ addEventListener('keyup', e => {
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; zStart = 0; });
 addEventListener('mousedown', () => SND.init());
 const down = (...c) => c.some(k => keys[k]);
+const TOUCH = matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window || /[?&]touch=1/.test(location.search);
+if (TOUCH) document.body.classList.add('touch');
+const kEv = (t, code) => dispatchEvent(new KeyboardEvent(t, { code, bubbles: true }));
+function touchDash() { // Noir/Niken dash comes from the input parser: feed it a forward dash directly; Kael/Lyra use Space
+  if (!P || G.state !== 'playing') return;
+  if (P.c.adv) P.bufDash = { t: 0.18, dir: P.facing, back: false }; else { kEv('keydown', 'Space'); setTimeout(() => kEv('keyup', 'Space'), 60); }
+}
+document.querySelectorAll('#touch [data-k]').forEach(b => {
+  const code = b.dataset.k; let on = false;
+  b.addEventListener('pointerdown', e => { e.preventDefault(); SND.init(); if (on) return; on = true; b.classList.add('on'); if (b.setPointerCapture) b.setPointerCapture(e.pointerId); if (code === 'DASH') touchDash(); else kEv('keydown', code); });
+  for (const n of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(n, () => { if (!on) return; on = false; b.classList.remove('on'); if (code !== 'DASH') kEv('keyup', code); });
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
 const tap = (...c) => c.some(k => hit[k]);
 
 // ===================== SAVE / LOAD (localStorage) =====================
@@ -2371,6 +2414,7 @@ function drawAmbient() {
 function spawnDummy() { const e = spawnEnemy('goblin', clamp(P.x + P.facing * 200, 80, G.stage.width - 80)); e.maxHp = e.hp = 99999; e.atk = 0; e.state = 'recover'; e.st = 1e9; e.cd = 1e9; return e; }
 function update(dt) {
   G.time += dt;
+  { const k = [G.state === 'playing', !!(P && P.c.adv), !!(P && P.c.niken)].join(); if (k !== G.tk) { G.tk = k; const b = document.body.classList; b.toggle('playing', G.state === 'playing'); b.toggle('adv', !!(P && P.c.adv)); b.toggle('niken', !!(P && P.c.niken)); } }
   { const vis = !!(G.train && P && P.c.adv && G.state === 'playing'); if (vis !== G.tv) { G.tv = vis; $('trainPanel').style.display = vis ? 'block' : 'none'; } }
   if (G.fadeDir) {
     G.fade += dt * 1.6 * G.fadeDir;
@@ -2643,9 +2687,10 @@ function drawHUD() {
     if (s.mp) { ctx.textAlign = 'right'; ctx.fillStyle = noMp ? '#ff6b81' : '#8fc8ff'; ctx.fillText(s.mp, x + sw - 3, y0 + sw - 4); }
   });
   // potions
-  panel(10, H - 62, 150, 48);
+  const pox = TOUCH ? W - 164 : 10, poy = TOUCH ? 84 : H - 62; // on touch screens the potion panel moves up so the thumb pad never covers it
+  panel(pox, poy, 150, 48);
   [['hpPot', '1'], ['mpPot', '2']].forEach(([k, key], i) => {
-    const x = 26 + i * 70, y = H - 38, c = ITEMS[k].color;
+    const x = pox + 16 + i * 70, y = poy + 24, c = ITEMS[k].color;
     ell(ctx, x, y + 3, 9, 9, c); ctx.fillStyle = '#e8f4ff'; ctx.fillRect(x - 4, y - 12, 8, 8);
     ctx.textAlign = 'left'; ctx.font = '900 13px "Trebuchet MS"'; ctx.fillStyle = '#fff'; ctx.fillText('x' + p.inv[k], x + 14, y + 8);
     ctx.font = '900 10px "Trebuchet MS"'; ctx.fillStyle = '#ffd36b'; ctx.fillText('[' + key + ']', x + 14, y - 5);
