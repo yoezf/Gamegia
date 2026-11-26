@@ -304,7 +304,7 @@ function touchDash() { // Noir/Niken dash comes from the input parser: feed it a
 }
 document.querySelectorAll('#touch [data-k]').forEach(b => {
   const code = b.dataset.k; let on = false;
-  b.addEventListener('pointerdown', e => { e.preventDefault(); SND.init(); if (on) return; on = true; b.classList.add('on'); if (b.setPointerCapture) b.setPointerCapture(e.pointerId); if (code === 'DASH') touchDash(); else kEv('keydown', code); });
+  b.addEventListener('pointerdown', e => { e.preventDefault(); SND.init(); if (on) return; on = true; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) { /* capture is optional */ } if (code === 'DASH') touchDash(); else kEv('keydown', code); });
   for (const n of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(n, () => { if (!on) return; on = false; b.classList.remove('on'); if (code !== 'DASH') kEv('keyup', code); });
   b.addEventListener('contextmenu', e => e.preventDefault());
 });
